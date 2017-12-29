@@ -18,9 +18,9 @@
 
 ## 下载
 
-1. Windows [下载地址](https://github.com/faceair/youjumpijump/releases/download/1.0/jumpAI-windows-amd64.exe)
-2. Linux [下载地址](https://github.com/faceair/youjumpijump/releases/download/1.0/jumpAI-linux-amd64)
-3. MacOS [下载地址](https://github.com/faceair/youjumpijump/releases/download/1.0/jumpAI-darwin-amd64)
+1. Windows [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
+2. Linux [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
+3. MacOS [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
 
 ## 实验结果
 

@@ -99,6 +99,10 @@ func main() {
 				break
 			}
 		}
+		if target[0] == 0 {
+			target = last
+		}
+
 		ms := int(math.Pow(math.Pow(float64(jumpCube[0]-target[0]), 2)+math.Pow(float64(jumpCube[1]-target[1]), 2), 0.5) * ratio)
 
 		log.Printf("from:%v to:%v wait:%vms", jumpCube, target, ms)
@@ -108,6 +112,6 @@ func main() {
 			log.Fatal(err)
 		}
 
-		time.Sleep(time.Millisecond * time.Duration(ms+420))
+		time.Sleep(time.Millisecond * time.Duration(ms+720))
 	}
 }
