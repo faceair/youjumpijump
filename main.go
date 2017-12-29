@@ -52,6 +52,12 @@ func main() {
 		bounds := src.Bounds()
 		w, h := bounds.Max.X, bounds.Max.Y
 
+		w10 := (w / 720 * 10)
+		w20 := (w / 720 * 20)
+		w30 := (w / 720 * 30)
+		w35 := (w / 720 * 35)
+		h200 := (h / 1280 * 200)
+
 		points := [][]int{}
 		for y := 0; y < h; y++ {
 			line := 0
@@ -60,7 +66,7 @@ func main() {
 				if colorSimilar(c, jumpCubeColor, 20) {
 					line++
 				} else {
-					if y > 200 && x-line > 10 && line > 30 {
+					if y > h200 && x-line > w10 && line > w30 {
 						points = append(points, []int{x - line/2, y, line})
 					}
 					line = 0
@@ -78,13 +84,13 @@ func main() {
 		possible := [][]int{}
 		for y := 0; y < h; y++ {
 			line := 0
-			bgColor := src.At(w-10, y)
+			bgColor := src.At(w-w10, y)
 			for x := 0; x < w; x++ {
 				c := src.At(x, y)
 				if !colorSimilar(c, bgColor, 10) {
 					line++
 				} else {
-					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
+					if y > h200 && x-line > w10 && line > w35 && ((x-line/2) < (jumpCube[0]-w20) || (x-line/2) > (jumpCube[0]+w20)) {
 						possible = append(possible, []int{x - line/2, y, line, x})
 					}
 					line = 0
