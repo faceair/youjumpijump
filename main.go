@@ -75,8 +75,7 @@ func main() {
 		}
 		jumpCube = []int{jumpCube[0], jumpCube[1]}
 
-		target := []int{0, 0}
-		last := []int{0, 0, 0, 0}
+		possible := [][]int{}
 		for y := 0; y < h; y++ {
 			line := 0
 			bgColor := src.At(w-10, y)
@@ -86,32 +85,28 @@ func main() {
 					line++
 				} else {
 					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
-						if x <= last[3] {
-							target = []int{last[0], last[1]}
-							break
-						}
-						last = []int{x - line/2, y, line, x}
+						possible = append(possible, []int{x - line/2, y, line, x})
 					}
 					line = 0
 				}
 			}
-			if target[0] != 0 {
-				break
+		}
+		target := possible[0]
+		for _, point := range possible {
+			if point[3] > target[3] && point[1]-target[1] <= 1 {
+				target = point
 			}
 		}
-		if target[0] == 0 {
-			target = last
-		}
+		target = []int{target[0], target[1]}
 
 		ms := int(math.Pow(math.Pow(float64(jumpCube[0]-target[0]), 2)+math.Pow(float64(jumpCube[1]-target[1]), 2), 0.5) * ratio)
-
-		log.Printf("from:%v to:%v wait:%vms", jumpCube, target, ms)
+		log.Printf("from:%v to:%v press:%vms", jumpCube, target, ms)
 
 		_, err = exec.Command("adb", "shell", "input", "swipe", "320", "410", "320", "410", strconv.Itoa(ms)).Output()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		time.Sleep(time.Millisecond * time.Duration(ms+720))
+		time.Sleep(time.Millisecond * 1500)
 	}
 }
