@@ -85,7 +85,7 @@ func main() {
 				if !colorSimilar(c, bgColor, 10) {
 					line++
 				} else {
-					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-30) || (x-line/2) > (jumpCube[0]+30)) {
+					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
 						if x <= last[3] {
 							target = []int{last[0], last[1]}
 							break
