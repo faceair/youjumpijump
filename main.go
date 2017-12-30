@@ -111,16 +111,10 @@ func main() {
 	for {
 		debugger()
 
-		exec.Command("adb", "rm", "/sdcard/jump*.png", "").Output()
-		_, err := exec.Command("adb", "shell", "screencap", "-p", "/sdcard/jump.png").Output()
+		_, err := exec.Command("/system/bin/screencap", "-p", "jump.png").Output()
 		if err != nil {
-			panic("ADB 执行失败，请手动执行 \"adb shell screencap -p /sdcard/jump.png\" 看是否有报错")
+			panic(err)
 		}
-		_, err = exec.Command("adb", "pull", "/sdcard/jump.png", ".").Output()
-		if err != nil {
-			panic("ADB 执行失败，请手动执行 \"adb pull /sdcard/jump.png .\" 看是否有报错")
-		}
-
 		infile, err := os.Open("jump.png")
 		if err != nil {
 			panic(err)
@@ -198,9 +192,9 @@ func main() {
 		ms := int(math.Pow(math.Pow(float64(jumpCube[0]-target[0]), 2)+math.Pow(float64(jumpCube[1]-target[1]), 2), 0.5) * ratio)
 		log.Printf("from:%v to:%v press:%vms", jumpCube, target, ms)
 
-		_, err = exec.Command("adb", "shell", "input", "swipe", "320", "410", "320", "410", strconv.Itoa(ms)).Output()
+		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", "320", "410", "320", "410", strconv.Itoa(ms)).Output()
 		if err != nil {
-			panic("ADB 执行失败，请手动执行 \"adb shell input swipe 320 410 320 410 300\" 看是否有报错")
+			panic(err)
 		}
 
 		infile.Close()
