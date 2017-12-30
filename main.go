@@ -101,7 +101,7 @@ func main() {
 	}()
 
 	var ratio float64
-	fmt.Print("请输入跳跃系数(推荐值 2.04):")
+	fmt.Print("请输入跳跃系数(推荐值 2.04，可适当调整):")
 	_, err := fmt.Scanln(&ratio)
 	if err != nil {
 		log.Fatal(err)
@@ -198,6 +198,6 @@ func main() {
 		}
 
 		infile.Close()
-		time.Sleep(time.Millisecond * 1500)
+		time.Sleep(time.Second)
 	}
 }

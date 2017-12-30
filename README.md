@@ -4,43 +4,38 @@
 
 用 Golang 重新实现是期望跨平台，方便打包给普通用户使用。代码逻辑精简过，运行速度会有提升。
 
+## 为什么要将文件 Push 到 Android 手机内执行？
+
+我们发现会有偶尔的情况下定位的关键点都是准的，ADB 命令也执行了，但是就是没跳过去；也有朋友跑着跑着突然 ADB 报错了，无法继续执行了；同时也有朋友使用的电脑上的模拟器，非常的稳定。所以我们推测 ADB 命令在某些情况下会有问题，可能也跟连接的线材有关。所以我们决定将程序移植到 Android 上，直接在 Android 上运行，也可以避开手机 USB 调试的一些安全设置。实验证明，确实稳定多了。
+
+## 下载地址
+
+Android [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
+
 ## 使用须知
 
-1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启调试模式
+1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启 USB 调试模式
 2. 进入微信打开微信跳一跳，点击开始游戏
-2. 运行本 AI
+3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump /data/local/tmp/ && adb shell`
+4. 跑起来 `cd /data/local/tmp/ && chmod +x ./youjumpijump && ./youjumpijump`
 
 ## 跳跃系数
 
 目前推荐设为 2.04，截图后会先 resize 成 720p 的图片然后再找点和跳跃。
 
-## 下载
-
-1. Windows [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
-2. Linux [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
-3. MacOS [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
-
 ## FAQ
 
-1. MacOS 和 Linux 下怎么运行这个程序？
+1. 怎么编译 Android 版本？
 
-在终端下运行 `chmod +x ./jumpAI-darwin-amd64 && ./jumpAI-darwin-amd64`
+`CGO_ENABLED=1 GOARCH=arm GOOS=linux go build .`
 
-2. 为什么我的手机没有反应？
-
-请手动执行 `adb shell input swipe 320 410 320 410 300` 看是否有反应，否则可能是手机设置问题，比如开发者选项中模拟点击是否有打开
-
-3. 为什么有时候跳很远 & 跳不远？
-
-不要动数据线，接触不良可能导致 ADB 命令执行失败。另外可以将这一跳的截图通过下面方式反馈。
-
-4. 锤子手机运行异常？
+2. 锤子手机运行异常？
 
 关大爆炸功能。
 
-3. 其他疑难杂症
+3. 其他疑难杂症？
 
-可以开新 issue 或加 QQ 群反馈 684623076，最好能附上截图。
+可以开新 issue 或加 QQ 群反馈 684623076，请附上日志 `adb pull /data/local/tmp/debugger` 供我们排查。
 
 ## 实验结果
 
