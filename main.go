@@ -52,11 +52,11 @@ func main() {
 	for {
 		_, err := exec.Command("adb", "shell", "screencap", "-p", "/sdcard/jump.png").Output()
 		if err != nil {
-			panic(err)
+			panic("ADB 执行失败，请手动执行 \"adb shell screencap -p /sdcard/jump.png\" 看是否有报错")
 		}
 		_, err = exec.Command("adb", "pull", "/sdcard/jump.png", ".").Output()
 		if err != nil {
-			panic(err)
+			panic("ADB 执行失败，请手动执行 \"adb pull /sdcard/jump.png .\" 看是否有报错")
 		}
 
 		infile, err := os.Open("jump.png")
@@ -126,7 +126,7 @@ func main() {
 
 		_, err = exec.Command("adb", "shell", "input", "swipe", "320", "410", "320", "410", strconv.Itoa(ms)).Output()
 		if err != nil {
-			panic(err)
+			panic("ADB 执行失败，请手动执行 \"adb shell input swipe 320 410 320 410 300\" 看是否有报错")
 		}
 
 		time.Sleep(time.Millisecond * 1500)
