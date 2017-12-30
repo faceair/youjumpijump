@@ -43,7 +43,7 @@ func main() {
 	}()
 
 	var ratio float64
-	fmt.Print("请输入跳跃系数:")
+	fmt.Print("请输入跳跃系数(推荐值 2.04):")
 	_, err := fmt.Scanln(&ratio)
 	if err != nil {
 		log.Fatal(err)
