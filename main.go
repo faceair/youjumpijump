@@ -15,12 +15,21 @@ import (
 	"github.com/nfnt/resize"
 )
 
-var jumpCubeColor = color.NRGBA{54, 52, 92, 255}
+func getRGB(m color.Model, c color.Color) [3]int {
+	if m == color.RGBAModel {
+		return [3]int{int(c.(color.RGBA).R), int(c.(color.RGBA).G), int(c.(color.RGBA).B)}
+	} else if m == color.RGBA64Model {
+		return [3]int{int(c.(color.RGBA64).R), int(c.(color.RGBA64).G), int(c.(color.RGBA64).B)}
+	} else if m == color.NRGBAModel {
+		return [3]int{int(c.(color.NRGBA).R), int(c.(color.NRGBA).G), int(c.(color.NRGBA).B)}
+	} else if m == color.NRGBA64Model {
+		return [3]int{int(c.(color.NRGBA64).R), int(c.(color.NRGBA64).G), int(c.(color.NRGBA64).B)}
+	}
+	return [3]int{0, 0, 0}
+}
 
-func colorSimilar(a, b color.Color, distance float64) bool {
-	ra, ga, ba := a.(color.NRGBA).A, a.(color.NRGBA).G, a.(color.NRGBA).B
-	rb, gb, bb := b.(color.NRGBA).A, b.(color.NRGBA).G, b.(color.NRGBA).B
-	return (math.Abs(float64(ra-rb)) < distance) && (math.Abs(float64(ga-gb)) < distance) && (math.Abs(float64(ba-bb)) < distance)
+func colorSimilar(a, b [3]int, distance float64) bool {
+	return (math.Abs(float64(a[0]-b[0])) < distance) && (math.Abs(float64(a[1]-b[1])) < distance) && (math.Abs(float64(a[2]-b[2])) < distance)
 }
 
 func main() {
@@ -61,16 +70,16 @@ func main() {
 			panic(err)
 		}
 		src = resize.Resize(720, 0, src, resize.Lanczos3)
-
 		bounds := src.Bounds()
 		w, h := bounds.Max.X, bounds.Max.Y
 
+		jumpCubeColor := [3]int{54, 52, 92}
 		points := [][]int{}
 		for y := 0; y < h; y++ {
 			line := 0
 			for x := 0; x < w; x++ {
 				c := src.At(x, y)
-				if colorSimilar(c, jumpCubeColor, 20) {
+				if colorSimilar(getRGB(src.ColorModel(), c), jumpCubeColor, 20) {
 					line++
 				} else {
 					if y > 200 && x-line > 10 && line > 30 {
@@ -91,10 +100,10 @@ func main() {
 		possible := [][]int{}
 		for y := 0; y < h; y++ {
 			line := 0
-			bgColor := src.At(w-10, y)
+			bgColor := getRGB(src.ColorModel(), src.At(w-10, y))
 			for x := 0; x < w; x++ {
 				c := src.At(x, y)
-				if !colorSimilar(c, bgColor, 10) {
+				if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 10) {
 					line++
 				} else {
 					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
