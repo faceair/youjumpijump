@@ -188,7 +188,7 @@ func main() {
 		}
 		target := possible[0]
 		for _, point := range possible {
-			if point[3] > target[3] && point[1]-target[1] <= 1 {
+			if point[3] > target[3] && point[1]-target[1] <= 5 {
 				target = point
 			}
 		}
