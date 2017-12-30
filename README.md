@@ -20,10 +20,6 @@
 2. Linux [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
 3. MacOS [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
 
-## 实验结果
-
-![](http://ww3.sinaimg.cn/large/0060lm7Tly1fmy1dpozipj30k00zkq46.jpg)
-
 ## FAQ
 
 1. MacOS 和 Linux 下怎么运行这个程序？
@@ -38,6 +34,14 @@
 
 不要动数据线，接触不良可能导致 ADB 命令执行失败。另外可以将这一跳的截图通过下面方式反馈。
 
+4. 锤子手机运行异常？
+
+关大爆炸功能。
+
 3. 其他疑难杂症
 
 可以开新 issue 或加 QQ 群反馈 684623076，最好能附上截图。
+
+## 实验结果
+
+![](http://ww3.sinaimg.cn/large/0060lm7Tly1fmy1dpozipj30k00zkq46.jpg)

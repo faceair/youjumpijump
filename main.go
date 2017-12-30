@@ -4,16 +4,36 @@ import (
 	"fmt"
 	"image/color"
 	"image/png"
+	"io"
+	"io/ioutil"
 	"log"
 	"math"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime/debug"
 	"strconv"
 	"time"
 
 	"github.com/nfnt/resize"
 )
+
+var basePath string
+
+func init() {
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	basePath = filepath.Dir(ex)
+
+	if ok, _ := exists(basePath + "/debugger"); !ok {
+		os.MkdirAll(basePath+"/debugger", os.ModePerm)
+	}
+
+	logFile, _ := os.OpenFile(basePath+"/debugger/debug.log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
+}
 
 func getRGB(m color.Model, c color.Color) [3]int {
 	if m == color.RGBAModel {
@@ -32,6 +52,43 @@ func colorSimilar(a, b [3]int, distance float64) bool {
 	return (math.Abs(float64(a[0]-b[0])) < distance) && (math.Abs(float64(a[1]-b[1])) < distance) && (math.Abs(float64(a[2]-b[2])) < distance)
 }
 
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}
+
+func timeStamp() int {
+	return int(time.Now().UnixNano()) / int(time.Second)
+}
+
+func debugger() {
+	if ok, _ := exists(basePath + "/jump.png"); ok {
+		os.Rename("jump.png", basePath+"/debugger/"+strconv.Itoa(timeStamp())+".png")
+
+		files, err := ioutil.ReadDir(basePath + "/debugger/")
+		if err != nil {
+			panic(err)
+		}
+
+		for _, f := range files {
+			fname := f.Name()
+			ext := filepath.Ext(fname)
+			name := fname[0 : len(fname)-len(ext)]
+			if ts, err := strconv.Atoi(name); err == nil {
+				if timeStamp()-ts > 10 {
+					os.Remove(basePath + "/debugger/" + fname)
+				}
+			}
+		}
+	}
+}
+
 func main() {
 	defer func() {
 		if e := recover(); e != nil {
@@ -48,8 +105,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("当前跳跃系数为 %f", ratio)
 
 	for {
+		debugger()
+
+		exec.Command("adb", "rm", "/sdcard/jump*.png", "").Output()
 		_, err := exec.Command("adb", "shell", "screencap", "-p", "/sdcard/jump.png").Output()
 		if err != nil {
 			panic("ADB 执行失败，请手动执行 \"adb shell screencap -p /sdcard/jump.png\" 看是否有报错")
@@ -68,7 +129,12 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
 		src = resize.Resize(720, 0, src, resize.Lanczos3)
+		f, _ := os.OpenFile("jump.720.png", os.O_WRONLY|os.O_CREATE, 0600)
+		png.Encode(f, src)
+		f.Close()
+
 		bounds := src.Bounds()
 		w, h := bounds.Max.X, bounds.Max.Y
 
@@ -95,6 +161,10 @@ func main() {
 			}
 		}
 		jumpCube = []int{jumpCube[0], jumpCube[1]}
+		if jumpCube[0] == 0 {
+			log.Print("找不到起点，请把 debugger 目录打包发给开发者检查问题。")
+			break
+		}
 
 		possible := [][]int{}
 		for y := 0; y < h; y++ {
@@ -111,6 +181,10 @@ func main() {
 					line = 0
 				}
 			}
+		}
+		if len(possible) == 0 {
+			log.Print("找不到落脚点，请把 debugger 目录打包发给开发者检查问题。")
+			break
 		}
 		target := possible[0]
 		for _, point := range possible {
