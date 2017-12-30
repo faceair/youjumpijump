@@ -8,8 +8,11 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"strconv"
 	"time"
+
+	"github.com/nfnt/resize"
 )
 
 var jumpCubeColor = color.NRGBA{54, 52, 92, 255}
@@ -21,6 +24,15 @@ func colorSimilar(a, b color.Color, distance float64) bool {
 }
 
 func main() {
+	defer func() {
+		if e := recover(); e != nil {
+			log.Printf("%s: %s", e, debug.Stack())
+			fmt.Print("程序已崩溃，请保存日志后按任意键退出\n")
+			var c string
+			fmt.Scanln(&c)
+		}
+	}()
+
 	var ratio float64
 	fmt.Print("请输入跳跃系数:")
 	_, err := fmt.Scanln(&ratio)
@@ -31,32 +43,27 @@ func main() {
 	for {
 		_, err := exec.Command("adb", "shell", "screencap", "-p", "/sdcard/jump.png").Output()
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		_, err = exec.Command("adb", "pull", "/sdcard/jump.png", ".").Output()
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 
 		infile, err := os.Open("jump.png")
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		defer infile.Close()
 
 		src, err := png.Decode(infile)
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
+		src = resize.Resize(720, 0, src, resize.Lanczos3)
 
 		bounds := src.Bounds()
 		w, h := bounds.Max.X, bounds.Max.Y
-
-		w10 := (w / 720 * 10)
-		w20 := (w / 720 * 20)
-		w30 := (w / 720 * 30)
-		w35 := (w / 720 * 35)
-		h200 := (h / 1280 * 200)
 
 		points := [][]int{}
 		for y := 0; y < h; y++ {
@@ -66,7 +73,7 @@ func main() {
 				if colorSimilar(c, jumpCubeColor, 20) {
 					line++
 				} else {
-					if y > h200 && x-line > w10 && line > w30 {
+					if y > 200 && x-line > 10 && line > 30 {
 						points = append(points, []int{x - line/2, y, line})
 					}
 					line = 0
@@ -84,13 +91,13 @@ func main() {
 		possible := [][]int{}
 		for y := 0; y < h; y++ {
 			line := 0
-			bgColor := src.At(w-w10, y)
+			bgColor := src.At(w-10, y)
 			for x := 0; x < w; x++ {
 				c := src.At(x, y)
 				if !colorSimilar(c, bgColor, 10) {
 					line++
 				} else {
-					if y > h200 && x-line > w10 && line > w35 && ((x-line/2) < (jumpCube[0]-w20) || (x-line/2) > (jumpCube[0]+w20)) {
+					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
 						possible = append(possible, []int{x - line/2, y, line, x})
 					}
 					line = 0
@@ -110,7 +117,7 @@ func main() {
 
 		_, err = exec.Command("adb", "shell", "input", "swipe", "320", "410", "320", "410", strconv.Itoa(ms)).Output()
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 
 		time.Sleep(time.Millisecond * 1500)

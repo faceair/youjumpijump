@@ -1,0 +1,3 @@
+package: github.com/faceair/youjumpijump
+import:
+- package: github.com/nfnt/resize
