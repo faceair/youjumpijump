@@ -63,7 +63,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		defer infile.Close()
 
 		src, err := png.Decode(infile)
 		if err != nil {
@@ -129,6 +128,7 @@ func main() {
 			panic("ADB 执行失败，请手动执行 \"adb shell input swipe 320 410 320 410 300\" 看是否有报错")
 		}
 
+		infile.Close()
 		time.Sleep(time.Millisecond * 1500)
 	}
 }
