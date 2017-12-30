@@ -91,6 +91,7 @@ func debugger() {
 
 func main() {
 	defer func() {
+		debugger()
 		if e := recover(); e != nil {
 			log.Printf("%s: %s", e, debug.Stack())
 			fmt.Print("程序已崩溃，请保存日志后按任意键退出\n")
@@ -172,7 +173,7 @@ func main() {
 			bgColor := getRGB(src.ColorModel(), src.At(w-10, y))
 			for x := 0; x < w; x++ {
 				c := src.At(x, y)
-				if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 10) {
+				if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 5) {
 					line++
 				} else {
 					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
