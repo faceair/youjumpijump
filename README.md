@@ -18,7 +18,7 @@ iOS [下载地址](https://github.com/faceair/youjumpijump/releases/latest) 下�
 
 Android 设备
 
-1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启 USB 调试模式
+1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启 USB 调试模式，如果有模拟点击的选项请一并开启
 2. 进入微信打开微信跳一跳，点击开始游戏
 3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump-android /data/local/tmp/ && adb shell`
 4. 跑起来 `cd /data/local/tmp/ && chmod 775 ./youjumpijump-android || true && ./youjumpijump-android`。
