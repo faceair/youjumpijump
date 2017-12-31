@@ -26,11 +26,20 @@ func main() {
 	}()
 
 	var ratio float64
-	fmt.Print("input jump ratio (recommend 2.04):")
-	_, err := fmt.Scanln(&ratio)
-	if err != nil {
-		log.Fatal(err)
+	var err error
+	if len(os.Args) > 1 {
+		ratio, err = strconv.ParseFloat(os.Args[1], 10)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		fmt.Print("input jump ratio (recommend 2.04):")
+		_, err = fmt.Scanln(&ratio)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	log.Printf("now jump ratio is %f", ratio)
 
 	for {
