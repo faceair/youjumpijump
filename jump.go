@@ -127,7 +127,7 @@ func Find(src image.Image) ([]int, []int) {
 	possible := [][]int{}
 	for y := 0; y < h; y++ {
 		line := 0
-		bgColor := getRGB(src.ColorModel(), src.At(w-10, y))
+		bgColor := getRGB(src.ColorModel(), src.At(w-25, y))
 		for x := 0; x < w; x++ {
 			c := src.At(x, y)
 			if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 5) {
