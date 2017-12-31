@@ -142,7 +142,7 @@ func main() {
 				if colorSimilar(getRGB(src.ColorModel(), c), jumpCubeColor, 20) {
 					line++
 				} else {
-					if y > 200 && x-line > 10 && line > 30 {
+					if y > 300 && x-line > 10 && line > 30 {
 						points = append(points, []int{x - line/2, y, line})
 					}
 					line = 0
@@ -170,7 +170,7 @@ func main() {
 				if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 5) {
 					line++
 				} else {
-					if y > 200 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
+					if y > 300 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
 						possible = append(possible, []int{x - line/2, y, line, x})
 					}
 					line = 0
