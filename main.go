@@ -64,7 +64,7 @@ func exists(path string) (bool, error) {
 }
 
 func timeStamp() int {
-	return int(time.Now().UnixNano()) / int(time.Second)
+	return int(time.Now().UnixNano() / int64(time.Second))
 }
 
 func debugger() {
