@@ -94,19 +94,19 @@ func main() {
 		debugger()
 		if e := recover(); e != nil {
 			log.Printf("%s: %s", e, debug.Stack())
-			fmt.Print("程序已崩溃，请保存日志后按任意键退出\n")
+			fmt.Print("the program has crashed, press any key to exit")
 			var c string
 			fmt.Scanln(&c)
 		}
 	}()
 
 	var ratio float64
-	fmt.Print("请输入跳跃系数(推荐值 2.04，可适当调整):")
+	fmt.Print("input jump ratio:")
 	_, err := fmt.Scanln(&ratio)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("当前跳跃系数为 %f", ratio)
+	log.Printf("now jump ratio is %f", ratio)
 
 	for {
 		debugger()
@@ -157,7 +157,7 @@ func main() {
 		}
 		jumpCube = []int{jumpCube[0], jumpCube[1]}
 		if jumpCube[0] == 0 {
-			log.Print("找不到起点，请把 debugger 目录打包发给开发者检查问题。")
+			log.Print("can't find the starting point，please export the debugger directory")
 			break
 		}
 
@@ -178,7 +178,7 @@ func main() {
 			}
 		}
 		if len(possible) == 0 {
-			log.Print("找不到落脚点，请把 debugger 目录打包发给开发者检查问题。")
+			log.Print("can't find the end point，please export the debugger directory")
 			break
 		}
 		target := possible[0]
