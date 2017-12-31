@@ -17,7 +17,7 @@ Android [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
 1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启 USB 调试模式
 2. 进入微信打开微信跳一跳，点击开始游戏
 3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump /data/local/tmp/ && adb shell`
-4. 跑起来 `cd /data/local/tmp/ && chmod +x ./youjumpijump && ./youjumpijump`
+4. 跑起来 `cd /data/local/tmp/ && chmod +x ./youjumpijump && ./youjumpijump`。如果提示 `bad mode`，可以直接执行 `./youjumpijump`。
 
 ## 跳跃系数
 
