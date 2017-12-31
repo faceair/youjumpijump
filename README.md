@@ -10,15 +10,23 @@
 
 ## 下载地址
 
-Android [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
-请下载 `youjumpijump` 单个文件，不要下载 `Source code`，Windows 用户可以尝试下载 Windows.zip 这个一键运行包（感谢群友 @  ♨﻿﻿Deloz.$ヽ. 和 @MonFig 支持）。
+Android [下载地址](https://github.com/faceair/youjumpijump/releases/latest) 请下载 `youjumpijump-android` 单个文件，不要下载 `Source code`，Windows 用户可以尝试下载 Windows.zip 这个一键运行包（感谢群友 @  ♨﻿﻿Deloz.$ヽ. 和 @MonFig 支持）。
+
+iOS [下载地址](https://github.com/faceair/youjumpijump/releases/latest) 下载 `youjumpijump-ios` 单个文件即可。
 
 ## 使用须知
 
+Android 设备
+
 1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启 USB 调试模式
 2. 进入微信打开微信跳一跳，点击开始游戏
-3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump /data/local/tmp/ && adb shell`
-4. 跑起来 `cd /data/local/tmp/ && chmod 775 ./youjumpijump || true && ./youjumpijump`。
+3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump-android /data/local/tmp/ && adb shell`
+4. 跑起来 `cd /data/local/tmp/ && chmod 775 ./youjumpijump-android || true && ./youjumpijump-android`。
+
+iOS 设备
+
+1. 需要在 Mac 上安装配置 WebDriverAgent，参考[教程](https://testerhome.com/topics/7220)
+2. 一切配置弄好后运行 `chmod 775 ./youjumpijump-ios || true && ./youjumpijump-ios`
 
 ## 跳跃系数
 
@@ -36,7 +44,7 @@ Android [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
 
 3. 怎么编译 Android 版本？
 
-`CGO_ENABLED=1 GOARCH=arm GOOS=linux go build .`
+`CGO_ENABLED=0 GOARCH=arm GOOS=linux go build -o youjumpijump-android android/main.go`
 
 4. 其他疑难杂症？
 
