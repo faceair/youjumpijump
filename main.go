@@ -101,7 +101,7 @@ func main() {
 	}()
 
 	var ratio float64
-	fmt.Print("input jump ratio:")
+	fmt.Print("input jump ratio (recommend 2.04):")
 	_, err := fmt.Scanln(&ratio)
 	if err != nil {
 		log.Fatal(err)

@@ -1,4 +1,4 @@
-# 微信跳一跳 AI
+# 微信跳一跳外挂
 
 思路和原理参考 https://github.com/wangshub/wechat_jump_game [自动跳跃算法细节参考](https://github.com/faceair/wechat_jump_game/blob/master/wechat_jump.py#L50)
 
