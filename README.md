@@ -35,7 +35,7 @@ Android [下载地址](https://github.com/faceair/youjumpijump/releases/latest)
 
 3. 其他疑难杂症？
 
-可以开新 issue 或加 QQ 群反馈 684623076，请附上日志 `adb pull /data/local/tmp/debugger` 供我们排查。
+开新 issue 请并附上日志 `adb pull /data/local/tmp/debugger` 供我们排查。
 
 ## 实验结果
 

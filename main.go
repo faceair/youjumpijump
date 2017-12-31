@@ -198,6 +198,6 @@ func main() {
 		}
 
 		infile.Close()
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 1500)
 	}
 }
