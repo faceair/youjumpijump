@@ -39,7 +39,6 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
 	log.Printf("now jump ratio is %f", ratio)
 
 	for {
@@ -47,16 +46,18 @@ func main() {
 
 		_, err := exec.Command("/system/bin/screencap", "-p", "jump.png").Output()
 		if err != nil {
-			panic(err)
+			panic("screenshot failed")
 		}
-		infile, err := os.Open("jump.png")
+
+		inFile, err := os.Open("jump.png")
 		if err != nil {
 			panic(err)
 		}
-		src, err := png.Decode(infile)
+		src, err := png.Decode(inFile)
 		if err != nil {
 			panic(err)
 		}
+		inFile.Close()
 
 		start, end := jump.Find(src)
 		if start == nil {
@@ -67,16 +68,15 @@ func main() {
 			break
 		}
 
-		ms := int(math.Pow(math.Pow(float64(start[0]-end[0]), 2)+math.Pow(float64(start[1]-end[1]), 2), 0.5) * ratio)
-		log.Printf("from:%v to:%v press:%vms", start, end, ms)
+		distance := math.Pow(math.Pow(float64(start[0]-end[0]), 2)+math.Pow(float64(start[1]-end[1]), 2), 0.5)
+		log.Printf("from:%v to:%v distance:%.2f ratio:%v press:%.2fms ", start, end, distance, ratio, distance*ratio)
 
 		scale := float64(src.Bounds().Max.X) / 720
-		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", strconv.FormatFloat(float64(start[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(start[1])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[1])*scale, 'f', 0, 32), strconv.Itoa(ms)).Output()
+		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", strconv.FormatFloat(float64(start[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(start[1])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[1])*scale, 'f', 0, 32), strconv.Itoa(int(distance*ratio))).Output()
 		if err != nil {
-			panic(err)
+			panic("touch failed")
 		}
 
-		infile.Close()
 		time.Sleep(time.Millisecond * 1500)
 	}
 }

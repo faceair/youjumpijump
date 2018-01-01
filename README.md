@@ -21,8 +21,8 @@ Android 设备
 1. Android 手机一台，电脑上安装 ADB，连接上电脑后开启 USB 调试模式，开发者选项中有模拟触摸选项的请一并开启
 2. 进入微信打开微信跳一跳，点击开始游戏
 3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump-android /data/local/tmp/ && adb shell`
-4. 跑起来 `cd /data/local/tmp/ && chmod 775 ./youjumpijump-android || true && ./youjumpijump-android`。
-5. 可以开启开发者选项中的指针位置选项，每次跳动的时候会在屏幕上画一条线，可以判断程序每次的定位准不准。
+4. 跑起来 `cd /data/local/tmp/ && chmod 775 ./youjumpijump-android || true && ./youjumpijump-android`
+5. 可以开启开发者选项中的指针位置选项，每次跳动的时候会在屏幕上画一条线，可以判断程序每次的定位准不准
 
 iOS 设备
 
@@ -39,9 +39,9 @@ iOS 设备
 
 请自行搜索解决，也可以尝试使用 [下载地址](https://github.com/faceair/youjumpijump/releases/latest) 中的 windows.zip 一键运行包，实在连不上可以[用模拟器](https://github.com/wangshub/wechat_jump_game/tree/master/%E6%96%B0%E6%89%8B%E5%B0%8F%E7%99%BD%E8%AF%B7%E4%BD%BF%E7%94%A8%E8%BF%99%E4%B8%AA%E4%BB%A3%E7%A0%81%20%20%E4%B8%8D%E9%9C%80%E8%A6%81%E4%BD%BF%E7%94%A8%E7%9C%9F%E6%9C%BA%E7%9A%84%E4%B8%93%E7%94%A8%E4%BB%A3%E7%A0%81)（不保证安全性，自行承担风险）。
 
-2. 锤子手机运行异常？
+2. 运行异常/第一下就飞了？
 
-关大爆炸功能。
+关大爆炸功能、关传送门、关悬浮球、运行时不能出现截图悬浮窗、关掉影响触摸和画面显示的相关功能。
 
 3. 怎么编译 Android 版本？
 
