@@ -1,20 +1,38 @@
 package jump
 
 import (
-	"encoding/gob"
+	"bufio"
+	"fmt"
 	"math"
 	"os"
+	"strconv"
+	"strings"
 )
 
+var similarFile *os.File
+
+func init() {
+	similarFile, _ = os.OpenFile(basePath+"/similar.ai", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+}
+
 func NewSimilar(ratio float64) *Similar {
-	similar := new(Similar)
-	f, err := os.Open("similar.ai")
-	if err == nil {
-		decoder := gob.NewDecoder(f)
-		err = decoder.Decode(similar)
+	similar := &Similar{
+		distances:    []float64{},
+		ratios:       map[float64]float64{},
+		defaultRatio: ratio,
 	}
-	f.Close()
-	similar.defaultRatio = ratio
+	scanner := bufio.NewScanner(similarFile)
+	for scanner.Scan() {
+		line := strings.Split(scanner.Text(), ",")
+		if len(line) == 2 {
+			distance, err1 := strconv.ParseFloat(line[0], 64)
+			ratio, err2 := strconv.ParseFloat(line[1], 64)
+			if err1 == nil && err2 == nil {
+				similar.Add(distance, ratio)
+			}
+		}
+	}
+
 	return similar
 }
 
@@ -25,6 +43,8 @@ type Similar struct {
 }
 
 func (s *Similar) Add(distance, ratio float64) {
+	similarFile.Write([]byte(fmt.Sprintf("%v,%v\n", distance, ratio)))
+
 	s.distances = append(s.distances, distance)
 	s.ratios[distance] = ratio
 }
@@ -46,13 +66,4 @@ func (s *Similar) Find(nowDistance float64) (similarDistance, simlarRatio float6
 	}
 
 	return sumD / count, sumR / count
-}
-
-func (s *Similar) Save() {
-	f, err := os.Create("similar.ai")
-	if err == nil {
-		encoder := gob.NewEncoder(f)
-		encoder.Encode(s)
-	}
-	f.Close()
 }

@@ -51,7 +51,6 @@ func screenshot(ip string) (*ScreenshotRes, image.Image) {
 
 func main() {
 	defer func() {
-		similar.Save()
 		jump.Debugger()
 		if e := recover(); e != nil {
 			log.Printf("%s: %s", e, debug.Stack())
@@ -110,9 +109,13 @@ func main() {
 		}
 
 		go func() {
-			time.Sleep(time.Millisecond * 170)
+			time.Sleep(time.Duration(nowDistance*nowRatio/1000+50) * time.Millisecond)
 			_, src := screenshot(ip)
 			finally, _ := jump.Find(src)
+
+			f, _ = os.OpenFile("jump.test.png", os.O_WRONLY|os.O_CREATE, 0600)
+			png.Encode(f, src)
+			f.Close()
 
 			if finally != nil {
 				finallyDistance := jump.Distance(start, finally)

@@ -36,7 +36,6 @@ func screenshot(filename string) image.Image {
 
 func main() {
 	defer func() {
-		similar.Save()
 		jump.Debugger()
 		if e := recover(); e != nil {
 			log.Printf("%s: %s", e, debug.Stack())
@@ -90,7 +89,7 @@ func main() {
 
 		go func() {
 			time.Sleep(time.Millisecond * 170)
-			src := screenshot("jump-test.png")
+			src := screenshot("jump.test.png")
 
 			finally, _ := jump.Find(src)
 			if finally != nil {
