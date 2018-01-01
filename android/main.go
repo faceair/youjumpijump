@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/png"
 	"log"
-	"math"
 	"os"
 	"os/exec"
 	"runtime/debug"
@@ -14,8 +14,29 @@ import (
 	jump "github.com/faceair/youjumpijump"
 )
 
+var similar *jump.Similar
+
+func screenshot(filename string) image.Image {
+	_, err := exec.Command("/system/bin/screencap", "-p", filename).Output()
+	if err != nil {
+		panic("screenshot failed")
+	}
+
+	inFile, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	src, err := png.Decode(inFile)
+	if err != nil {
+		panic(err)
+	}
+	inFile.Close()
+	return src
+}
+
 func main() {
 	defer func() {
+		similar.Save()
 		jump.Debugger()
 		if e := recover(); e != nil {
 			log.Printf("%s: %s", e, debug.Stack())
@@ -25,39 +46,27 @@ func main() {
 		}
 	}()
 
-	var ratio float64
+	var inputRatio float64
 	var err error
 	if len(os.Args) > 1 {
-		ratio, err = strconv.ParseFloat(os.Args[1], 10)
+		inputRatio, err = strconv.ParseFloat(os.Args[1], 10)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
 		fmt.Print("input jump ratio (recommend 2.04):")
-		_, err = fmt.Scanln(&ratio)
+		_, err = fmt.Scanln(&inputRatio)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-	log.Printf("now jump ratio is %f", ratio)
+
+	similar = jump.NewSimilar(inputRatio)
 
 	for {
 		jump.Debugger()
 
-		_, err := exec.Command("/system/bin/screencap", "-p", "jump.png").Output()
-		if err != nil {
-			panic("screenshot failed")
-		}
-
-		inFile, err := os.Open("jump.png")
-		if err != nil {
-			panic(err)
-		}
-		src, err := png.Decode(inFile)
-		if err != nil {
-			panic(err)
-		}
-		inFile.Close()
+		src := screenshot("jump.png")
 
 		start, end := jump.Find(src)
 		if start == nil {
@@ -68,14 +77,31 @@ func main() {
 			break
 		}
 
-		distance := math.Pow(math.Pow(float64(start[0]-end[0]), 2)+math.Pow(float64(start[1]-end[1]), 2), 0.5)
-		log.Printf("from:%v to:%v distance:%.2f ratio:%v press:%.2fms ", start, end, distance, ratio, distance*ratio)
-
 		scale := float64(src.Bounds().Max.X) / 720
-		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", strconv.FormatFloat(float64(start[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(start[1])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[1])*scale, 'f', 0, 32), strconv.Itoa(int(distance*ratio))).Output()
+		nowDistance := jump.Distance(start, end)
+		similarDistance, nowRatio := similar.Find(nowDistance)
+
+		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, nowDistance, similarDistance, nowRatio, nowDistance*nowRatio)
+
+		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", strconv.FormatFloat(float64(start[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(start[1])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[0])*scale, 'f', 0, 32), strconv.FormatFloat(float64(end[1])*scale, 'f', 0, 32), strconv.Itoa(int(nowDistance*nowRatio))).Output()
 		if err != nil {
 			panic("touch failed")
 		}
+
+		go func() {
+			time.Sleep(time.Millisecond * 170)
+			src := screenshot("jump-test.png")
+
+			finally, _ := jump.Find(src)
+			if finally != nil {
+				finallyDistance := jump.Distance(start, finally)
+				finallyRatio := (nowDistance * nowRatio) / finallyDistance
+
+				if finallyRatio > nowRatio/2 && finallyRatio < nowRatio*2 {
+					similar.Add(finallyDistance, finallyRatio)
+				}
+			}
+		}()
 
 		time.Sleep(time.Millisecond * 1500)
 	}

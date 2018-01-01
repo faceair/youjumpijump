@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/png"
 	"log"
-	"math"
 	"os"
 	"runtime/debug"
 	"time"
@@ -15,14 +15,43 @@ import (
 	jump "github.com/faceair/youjumpijump"
 )
 
+var similar *jump.Similar
+
+var r = jump.NewRequest()
+
 type ScreenshotRes struct {
 	Value     string `json:"value"`
 	SessionID string `json:"sessionId"`
 	Status    int    `json:"status"`
 }
 
+func screenshot(ip string) (*ScreenshotRes, image.Image) {
+	_, body, err := r.Get(fmt.Sprintf("http://%s/screenshot", ip))
+	if err != nil {
+		panic(err)
+	}
+
+	res := new(ScreenshotRes)
+	err = json.Unmarshal(body, res)
+	if err != nil {
+		panic(err)
+	}
+
+	pngValue, err := base64.StdEncoding.DecodeString(res.Value)
+	if err != nil {
+		panic(err)
+	}
+
+	src, err := png.Decode(bytes.NewReader(pngValue))
+	if err != nil {
+		panic(err)
+	}
+	return res, src
+}
+
 func main() {
 	defer func() {
+		similar.Save()
 		jump.Debugger()
 		if e := recover(); e != nil {
 			log.Printf("%s: %s", e, debug.Stack())
@@ -39,39 +68,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var ratio float64
+	var inputRatio float64
 	fmt.Print("请输入跳跃系数(推荐值 2，可适当调整):")
-	_, err = fmt.Scanln(&ratio)
+	_, err = fmt.Scanln(&inputRatio)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("现在跳跃系数是 %f", ratio)
 
-	r := jump.NewRequest()
+	similar = jump.NewSimilar(inputRatio)
 
 	for {
 		jump.Debugger()
 
-		_, body, err := r.Get(fmt.Sprintf("http://%s/screenshot", ip))
-		if err != nil {
-			panic(err)
-		}
-
-		scr := new(ScreenshotRes)
-		err = json.Unmarshal(body, scr)
-		if err != nil {
-			panic(err)
-		}
-
-		pngValue, err := base64.StdEncoding.DecodeString(scr.Value)
-		if err != nil {
-			panic(err)
-		}
-
-		src, err := png.Decode(bytes.NewReader(pngValue))
-		if err != nil {
-			panic(err)
-		}
+		res, src := screenshot(ip)
 
 		f, _ := os.OpenFile("jump.png", os.O_WRONLY|os.O_CREATE, 0600)
 		png.Encode(f, src)
@@ -86,17 +95,34 @@ func main() {
 			break
 		}
 
-		ms := float64(math.Pow(math.Pow(float64(start[0]-end[0]), 2)+math.Pow(float64(start[1]-end[1]), 2), 0.5) * ratio)
-		log.Printf("from:%v to:%v press:%vms", start, end, ms)
+		nowDistance := jump.Distance(start, end)
+		similarDistance, nowRatio := similar.Find(nowDistance)
 
-		_, _, err = r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, scr.SessionID), map[string]interface{}{
+		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, nowDistance, similarDistance, nowRatio, nowDistance*nowRatio)
+
+		_, _, err = r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
 			"x":        200,
 			"y":        200,
-			"duration": ms / 1000,
+			"duration": nowDistance * nowRatio / 1000,
 		})
 		if err != nil {
 			panic(err)
 		}
+
+		go func() {
+			time.Sleep(time.Millisecond * 170)
+			_, src := screenshot(ip)
+			finally, _ := jump.Find(src)
+
+			if finally != nil {
+				finallyDistance := jump.Distance(start, finally)
+				finallyRatio := (nowDistance * nowRatio) / finallyDistance
+
+				if finallyRatio > nowRatio/2 && finallyRatio < nowRatio*2 {
+					similar.Add(finallyDistance, finallyRatio)
+				}
+			}
+		}()
 
 		time.Sleep(time.Millisecond * 1500)
 	}

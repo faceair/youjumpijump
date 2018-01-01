@@ -71,6 +71,10 @@ func TimeStamp() int {
 	return int(time.Now().UnixNano() / int64(time.Second))
 }
 
+func Distance(a, b []int) float64 {
+	return math.Pow(math.Pow(float64(a[0]-b[0]), 2)+math.Pow(float64(a[1]-b[1]), 2), 0.5)
+}
+
 func getRGB(m color.Model, c color.Color) [3]int {
 	if m == color.RGBAModel {
 		return [3]int{int(c.(color.RGBA).R), int(c.(color.RGBA).G), int(c.(color.RGBA).B)}
@@ -106,7 +110,7 @@ func Find(src image.Image) ([]int, []int) {
 			if colorSimilar(getRGB(src.ColorModel(), c), jumpCubeColor, 20) {
 				line++
 			} else {
-				if y > 300 && x-line > 10 && line > 30 {
+				if y > 350 && x-line > 10 && line > 30 {
 					points = append(points, []int{x - line/2, y, line})
 				}
 				line = 0
@@ -133,7 +137,7 @@ func Find(src image.Image) ([]int, []int) {
 			if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 5) {
 				line++
 			} else {
-				if y > 300 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
+				if y > 350 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
 					possible = append(possible, []int{x - line/2, y, line, x})
 				}
 				line = 0
