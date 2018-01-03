@@ -71,7 +71,8 @@ func main() {
 	fmt.Print("请输入跳跃系数(推荐值 2，可适当调整):")
 	_, err = fmt.Scanln(&inputRatio)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("未输入跳跃系数，将采用默认跳跃系数2")
+		inputRatio = 2
 	}
 
 	similar = jump.NewSimilar(inputRatio)
