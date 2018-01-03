@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"log"
 	"os"
+	"math/rand"
 	"runtime/debug"
 	"time"
 
@@ -112,8 +113,8 @@ func main() {
 		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, nowDistance, similarDistance, nowRatio, nowDistance*nowRatio)
 
 		_, _, err := r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
-			"x":        200,
-			"y":        200,
+			"x":        150 + rand.Intn(100),
+			"y":        150 + rand.Intn(100),
 			"duration": nowDistance * nowRatio / 1000,
 		})
 		if err != nil {
