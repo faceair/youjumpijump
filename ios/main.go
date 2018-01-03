@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"image"
 	"image/png"
@@ -61,18 +62,26 @@ func main() {
 	}()
 
 	var ip string
-	fmt.Print("请输入 WebDriverAgentRunner 监听的 IP 和端口 (例如 192.168.9.94:8100):")
-	_, err := fmt.Scanln(&ip)
-	if err != nil {
-		log.Fatal(err)
+	var inputRatio float64
+	flag.StringVar(&ip, "ip", "", "WebDriverAgentRunner 监听的 IP 和端口 (例如 192.168.9.94:8100)")
+	flag.Float64Var(&inputRatio, "radio", 0, "跳跃系数(推荐值 2，可适当调整)")
+	flag.Parse()
+
+	if ip == "" {
+		fmt.Print("请输入 WebDriverAgentRunner 监听的 IP 和端口 (例如 192.168.9.94:8100):")
+		_, err := fmt.Scanln(&ip)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	var inputRatio float64
-	fmt.Print("请输入跳跃系数(推荐值 2，可适当调整):")
-	_, err = fmt.Scanln(&inputRatio)
-	if err != nil {
-		log.Printf("未输入跳跃系数，将采用默认跳跃系数2")
-		inputRatio = 2
+	if inputRatio == 0 {
+		fmt.Print("请输入跳跃系数(推荐值 2，可适当调整):")
+		_, err := fmt.Scanln(&inputRatio)
+		if err != nil {
+			log.Printf("未输入跳跃系数，将采用默认跳跃系数2")
+			inputRatio = 2
+		}
 	}
 
 	similar = jump.NewSimilar(inputRatio)
@@ -102,7 +111,7 @@ func main() {
 
 		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, nowDistance, similarDistance, nowRatio, nowDistance*nowRatio)
 
-		_, _, err = r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
+		_, _, err := r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
 			"x":        200,
 			"y":        200,
 			"duration": nowDistance * nowRatio / 1000,
