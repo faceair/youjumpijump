@@ -56,7 +56,8 @@ func main() {
 		fmt.Print("input jump ratio (recommend 2.04):")
 		_, err = fmt.Scanln(&inputRatio)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("input is empty, will use 2.04 as default ratio")
+			inputRatio = 2.04
 		}
 	}
 
