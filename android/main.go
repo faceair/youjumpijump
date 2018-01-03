@@ -79,7 +79,9 @@ func main() {
 
 		scale := float64(src.Bounds().Max.X) / 720
 		nowDistance := jump.Distance(start, end)
-		similarDistance, nowRatio := similar.Find(nowDistance)
+		// TODO: https://github.com/faceair/youjumpijump/issues/61
+		// similarDistance, nowRatio := similar.Find(nowDistance)
+		similarDistance, nowRatio := 0.0, inputRatio
 
 		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, nowDistance, similarDistance, nowRatio, nowDistance*nowRatio)
 
@@ -89,6 +91,8 @@ func main() {
 		}
 
 		go func() {
+			// TODO: https://github.com/faceair/youjumpijump/issues/61
+			return
 			time.Sleep(time.Millisecond * 170)
 			src := screenshot("jump.test.png")
 

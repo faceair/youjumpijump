@@ -96,7 +96,9 @@ func main() {
 		}
 
 		nowDistance := jump.Distance(start, end)
-		similarDistance, nowRatio := similar.Find(nowDistance)
+		// TODO: https://github.com/faceair/youjumpijump/issues/61
+		// similarDistance, nowRatio := similar.Find(nowDistance)
+		similarDistance, nowRatio := 0.0, inputRatio
 
 		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, nowDistance, similarDistance, nowRatio, nowDistance*nowRatio)
 
@@ -110,6 +112,8 @@ func main() {
 		}
 
 		go func() {
+			// TODO: https://github.com/faceair/youjumpijump/issues/61
+			return
 			time.Sleep(time.Duration(nowDistance*nowRatio/1000+50) * time.Millisecond)
 			_, src := screenshot(ip)
 			finally, _ := jump.Find(src)
