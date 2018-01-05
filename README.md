@@ -6,7 +6,7 @@
 
 ## ⚠️ 警告
 
-目前微信开始大规模的进行反作弊，严重的可能记录清零拉黑名单，手动游戏都无法记录成绩。目前还没有找到合理的反作弊方案，请慎重使用。也欢迎参与讨论 https://github.com/faceair/youjumpijump/issues/74。
+目前微信开始大规模的进行反作弊，严重的可能记录清零拉黑名单，手动游戏都无法记录成绩。目前还没有找到合理的反作弊方案，请慎重使用。也欢迎参与讨论 https://github.com/faceair/youjumpijump/issues/74
 
 ## 为什么要将文件 Push 到 Android 手机内执行？
 
