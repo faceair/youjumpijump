@@ -3,77 +3,15 @@ package jump
 import (
 	"image"
 	"image/color"
-	"image/png"
-	"io"
-	"io/ioutil"
-	"log"
 	"math"
 	"os"
-	"path/filepath"
-	"strconv"
-	"time"
 
 	"github.com/nfnt/resize"
 )
 
-var basePath string
-
-func init() {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	basePath = filepath.Dir(ex)
-
-	if ok, _ := Exists(basePath + "/debugger"); !ok {
-		os.MkdirAll(basePath+"/debugger", os.ModePerm)
-	}
-
-	os.Remove(basePath + "/debugger/debug.log")
-	logFile, _ := os.OpenFile(basePath+"/debugger/debug.log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
-}
-
-func Debugger() {
-	if ok, _ := Exists(basePath + "/jump.png"); ok {
-		os.Rename(basePath+"/jump.png", basePath+"/debugger/"+strconv.Itoa(TimeStamp())+".png")
-
-		files, err := ioutil.ReadDir(basePath + "/debugger/")
-		if err != nil {
-			panic(err)
-		}
-
-		for _, f := range files {
-			fname := f.Name()
-			ext := filepath.Ext(fname)
-			name := fname[0 : len(fname)-len(ext)]
-			if ts, err := strconv.Atoi(name); err == nil {
-				if TimeStamp()-ts > 10 {
-					os.Remove(basePath + "/debugger/" + fname)
-				}
-			}
-		}
-	}
-}
-
-func Exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
-
-func TimeStamp() int {
-	return int(time.Now().UnixNano() / int64(time.Second))
-}
-
-func Distance(a, b []int) float64 {
-	return math.Pow(math.Pow(float64(a[0]-b[0]), 2)+math.Pow(float64(a[1]-b[1]), 2), 0.5)
-}
+var ExcludedHeight = 350
+var ExcludedWeight = 25
+var BottleColor = [3]int{55, 56, 97}
 
 func getRGB(m color.Model, c color.Color) [3]int {
 	if m == color.RGBAModel {
@@ -92,68 +30,69 @@ func colorSimilar(a, b [3]int, distance float64) bool {
 	return (math.Abs(float64(a[0]-b[0])) < distance) && (math.Abs(float64(a[1]-b[1])) < distance) && (math.Abs(float64(a[2]-b[2])) < distance)
 }
 
-func Find(src image.Image) ([]int, []int) {
-	src = resize.Resize(720, 0, src, resize.Lanczos3)
-	f, _ := os.OpenFile("jump.720.png", os.O_WRONLY|os.O_CREATE, 0600)
-	png.Encode(f, src)
-	f.Close()
+func Find(pic image.Image) ([]int, []int) {
+	pic = resize.Resize(720, 0, pic, resize.Lanczos3)
 
-	bounds := src.Bounds()
+	if len(os.Getenv("DEBUG")) > 0 {
+		go SavePNG("jump.720.png", pic)
+	}
+
+	bounds := pic.Bounds()
 	w, h := bounds.Max.X, bounds.Max.Y
 
-	jumpCubeColor := [3]int{54, 52, 92}
 	points := [][]int{}
 	for y := 0; y < h; y++ {
 		line := 0
 		for x := 0; x < w; x++ {
-			c := src.At(x, y)
-			if colorSimilar(getRGB(src.ColorModel(), c), jumpCubeColor, 20) {
+			c := pic.At(x, y)
+			if colorSimilar(getRGB(pic.ColorModel(), c), BottleColor, 20) {
 				line++
 			} else {
-				if y > 350 && x-line > 10 && line > 30 {
+				if y > ExcludedHeight && x-line > ExcludedWeight && line > 30 {
 					points = append(points, []int{x - line/2, y, line})
 				}
 				line = 0
 			}
 		}
 	}
-	jumpCube := []int{0, 0, 0}
+	bottle := []int{0, 0, 0}
 	for _, point := range points {
-		if point[2] > jumpCube[2] {
-			jumpCube = point
+		if point[2] >= bottle[2] && point[1] > bottle[1] {
+			bottle = point
 		}
 	}
-	jumpCube = []int{jumpCube[0], jumpCube[1]}
-	if jumpCube[0] == 0 {
+	bottle = []int{bottle[0], bottle[1]}
+	if bottle[0] == 0 {
 		return nil, nil
 	}
 
-	possible := [][]int{}
+	points = [][]int{}
 	for y := 0; y < h; y++ {
 		line := 0
-		bgColor := getRGB(src.ColorModel(), src.At(w-25, y))
+		bgColor := getRGB(pic.ColorModel(), pic.At(w-ExcludedWeight, y))
 		for x := 0; x < w; x++ {
-			c := src.At(x, y)
-			if !colorSimilar(getRGB(src.ColorModel(), c), bgColor, 5) {
+			c := pic.At(x, y)
+			if !colorSimilar(getRGB(pic.ColorModel(), c), bgColor, 5) {
 				line++
 			} else {
-				if y > 350 && x-line > 10 && line > 35 && ((x-line/2) < (jumpCube[0]-20) || (x-line/2) > (jumpCube[0]+20)) {
-					possible = append(possible, []int{x - line/2, y, line, x})
+				if y > ExcludedHeight && x-line > ExcludedWeight && line > 30 &&
+					((x-line/2) < (bottle[0]-20) || (x-line/2) > (bottle[0]+20)) {
+					points = append(points, []int{x - line/2, y, line, x})
 				}
 				line = 0
 			}
 		}
 	}
-	if len(possible) == 0 {
-		return jumpCube, nil
+	if len(points) == 0 {
+		return bottle, nil
 	}
-	target := possible[0]
-	for _, point := range possible {
-		if point[3] > target[3] && point[1]-target[1] <= 5 {
-			target = point
+	block := points[0]
+	for _, point := range points {
+		if point[3] > block[3] && point[1]-block[1] < 5 && math.Abs(float64(block[0]-point[0])) < 2 {
+			block = point
 		}
 	}
-	target = []int{target[0], target[1]}
+	block = []int{block[0], block[1]}
 
-	return jumpCube, target
+	return bottle, block
 }
