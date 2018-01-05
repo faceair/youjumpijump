@@ -61,7 +61,7 @@ func main() {
 	var ip string
 	var inputRatio float64
 	flag.StringVar(&ip, "ip", "", "WebDriverAgentRunner 监听的 IP 和端口 (例如 192.168.9.94:8100)")
-	flag.Float64Var(&inputRatio, "radio", 0, "跳跃系数(推荐值 2，可适当调整)")
+	flag.Float64Var(&inputRatio, "ratio", 0, "跳跃系数(推荐值 2，可适当调整)")
 	flag.Parse()
 
 	if ip == "" {
@@ -105,6 +105,6 @@ func main() {
 			log.Fatal("WebDriverAgentRunner 连接失败，请参考 https://github.com/faceair/youjumpijump/issues/71")
 		}
 
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Millisecond * 1200)
 	}
 }

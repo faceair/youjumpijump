@@ -40,7 +40,7 @@ func main() {
 	}()
 
 	var inputRatio float64
-	flag.Float64Var(&inputRatio, "radio", 0, "跳跃系数(推荐值 2.04，可适当调整)")
+	flag.Float64Var(&inputRatio, "ratio", 0, "跳跃系数(推荐值 2.04，可适当调整)")
 	flag.Parse()
 
 	var err error
