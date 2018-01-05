@@ -88,7 +88,7 @@ func Find(pic image.Image) ([]int, []int) {
 	}
 	block := points[0]
 	for _, point := range points {
-		if point[3] > block[3] && point[1]-block[1] < 5 && math.Abs(float64(block[0]-point[0])) < 2 {
+		if point[3] > block[3] && math.Abs(float64(block[0]-point[0])) < 2 {
 			block = point
 		}
 	}
