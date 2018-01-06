@@ -9,12 +9,39 @@ import (
 	"time"
 )
 
+var randDeviation int
+
 func init() {
 	rand.Seed(time.Now().Unix())
 }
 
 func Distance(a, b []int) float64 {
 	return math.Pow(math.Pow(float64(a[0]-b[0]), 2)+math.Pow(float64(a[1]-b[1]), 2), 0.5)
+}
+
+func GenWaitTime() int {
+	waitTime := Random(1500, 5*1000)
+	if Random(0, 10*1000) == 0 {
+		waitTime += Random(5*1000, 10*1000)
+	}
+	if Random(0, 60) == 0 {
+		waitTime += Random(50*1000, 60*1000)
+	}
+	return waitTime
+}
+
+func GenRandDeviation(block []int) ([]int, int) {
+	if block[2] > 120 && randDeviation == 0 {
+		randDeviation = Random(15, 20)
+		if Random(0, 2) == 0 {
+			randDeviation *= -1
+		}
+	} else {
+		// 不连续偏移，极有可能掉
+		randDeviation = 0
+	}
+	block[0] += randDeviation
+	return block, randDeviation
 }
 
 func Random(min, max int) int {

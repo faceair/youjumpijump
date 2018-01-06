@@ -61,14 +61,14 @@ func main() {
 	var ip string
 	var inputRatio float64
 	flag.StringVar(&ip, "ip", "", "WebDriverAgentRunner 监听的 IP 和端口 (例如 192.168.9.94:8100)")
-	flag.Float64Var(&inputRatio, "ratio", 0, "跳跃系数(推荐值 2，可适当调整)")
+	flag.Float64Var(&inputRatio, "ratio", 0, "跳跃系数(推荐值 2.04，可适当调整)")
 	flag.Parse()
 
 	if ip == "" {
 		fmt.Print("请输入 WebDriverAgentRunner 监听的 IP 和端口 (例如 192.168.9.94:8100):")
 		_, err := fmt.Scanln(&ip)
 		if err != nil {
-			log.Fatal("WebDriverAgentRunner 连接失败，请参考 https://github.com/faceair/youjumpijump/issues/71")
+			log.Fatal("请正确输入 WebDriverAgentRunner IP 端口")
 		}
 	}
 	if inputRatio == 0 {
@@ -93,18 +93,20 @@ func main() {
 			log.Fatal("找不到落点，请把 debugger 目录打包发给开发者检查问题。")
 		}
 
+		end, deviation := jump.GenRandDeviation(end)
 		distance := jump.Distance(start, end)
-		log.Printf("from:%v to:%v distance:%.2f press:%.2fms ", start, end, distance, distance*inputRatio)
+		waitTime := jump.GenWaitTime()
+		log.Printf("from:%v to:%v deviation:%d distance:%.2f press:%.2fms wait:%dms", start, end, deviation, distance, distance*inputRatio, waitTime)
 
 		_, _, err := r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
-			"x":        jump.Random(100, 400),
-			"y":        jump.Random(100, 400),
+			"x":        jump.Random(int(float64(pic.Bounds().Max.X)*0.5), int(float64(pic.Bounds().Max.X)*0.8)),
+			"y":        jump.Random(int(float64(pic.Bounds().Max.Y)*0.5), int(float64(pic.Bounds().Max.Y)*0.8)),
 			"duration": distance * inputRatio / 1000,
 		})
 		if err != nil {
 			log.Fatal("WebDriverAgentRunner 连接失败，请参考 https://github.com/faceair/youjumpijump/issues/71")
 		}
 
-		time.Sleep(time.Millisecond * 1200)
+		time.Sleep(time.Millisecond * time.Duration(waitTime))
 	}
 }

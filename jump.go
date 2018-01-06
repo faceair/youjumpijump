@@ -27,7 +27,9 @@ func getRGB(m color.Model, c color.Color) [3]int {
 }
 
 func colorSimilar(a, b [3]int, distance float64) bool {
-	return (math.Abs(float64(a[0]-b[0])) < distance) && (math.Abs(float64(a[1]-b[1])) < distance) && (math.Abs(float64(a[2]-b[2])) < distance)
+	return (math.Abs(float64(a[0]-b[0])) < distance) &&
+		(math.Abs(float64(a[1]-b[1])) < distance) &&
+		(math.Abs(float64(a[2]-b[2])) < distance)
 }
 
 func Find(pic image.Image) ([]int, []int) {
@@ -92,7 +94,7 @@ func Find(pic image.Image) ([]int, []int) {
 			block = point
 		}
 	}
-	block = []int{block[0], block[1]}
+	block = []int{block[0], block[1], block[2]}
 
 	return bottle, block
 }

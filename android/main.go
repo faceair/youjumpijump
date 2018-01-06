@@ -75,16 +75,19 @@ func main() {
 			log.Fatal("找不到落点，请使用 adb pull /data/local/tmp/debugger 把 debugger 目录拉下来打包发给开发者检查问题。")
 		}
 
+		end, deviation := jump.GenRandDeviation(end)
 		distance := jump.Distance(start, end)
-		log.Printf("from:%v to:%v distance:%.2f press:%.2fms ", start, end, distance, distance*inputRatio)
+		waitTime := jump.GenWaitTime()
+		log.Printf("from:%v to:%v deviation:%d distance:%.2f press:%.2fms wait:%dms", start, []int{end[0], end[1]}, deviation, distance, distance*inputRatio, waitTime)
 
-		touchX, touchY := strconv.Itoa(jump.Random(100, 400)), strconv.Itoa(jump.Random(100, 400))
+		touchX := strconv.Itoa(jump.Random(int(float64(pic.Bounds().Max.X)*0.5), int(float64(pic.Bounds().Max.X)*0.8)))
+		touchY := strconv.Itoa(jump.Random(int(float64(pic.Bounds().Max.Y)*0.5), int(float64(pic.Bounds().Max.Y)*0.8)))
 		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", touchX, touchY, touchX, touchY,
 			strconv.Itoa(int(distance*inputRatio))).Output()
 		if err != nil {
 			log.Fatal("模拟触摸失败，请检查开发者选项中的 USB 调试安全设置是否打开。")
 		}
 
-		time.Sleep(time.Millisecond * 1200)
+		time.Sleep(time.Millisecond * time.Duration(waitTime))
 	}
 }
