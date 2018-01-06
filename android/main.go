@@ -14,6 +14,7 @@ import (
 	"time"
 
 	jump "github.com/faceair/youjumpijump"
+	"github.com/nfnt/resize"
 )
 
 func screenshot() image.Image {
@@ -54,6 +55,7 @@ func main() {
 	}
 
 	var pic image.Image
+	var start, end []int
 
 	for {
 		jump.Debugger()
@@ -66,9 +68,14 @@ func main() {
 		} else {
 			pic = screenshot()
 			go jump.SavePNG("jump.png", pic)
+
+			pic = resize.Resize(720, 0, pic, resize.Lanczos3)
+			if len(os.Getenv("DEBUG")) > 0 {
+				go jump.SavePNG("jump.720.png", pic)
+			}
 		}
 
-		start, end := jump.Find(pic)
+		start, end = jump.Find(pic)
 		if start == nil {
 			log.Fatal("找不到起点，请使用 adb pull /data/local/tmp/debugger 把 debugger 目录拉下来打包发给开发者检查问题。")
 		} else if end == nil {

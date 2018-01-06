@@ -9,10 +9,12 @@ import (
 	"image"
 	"image/png"
 	"log"
+	"os"
 	"runtime/debug"
 	"time"
 
 	jump "github.com/faceair/youjumpijump"
+	"github.com/nfnt/resize"
 )
 
 var r = jump.NewRequest()
@@ -80,11 +82,22 @@ func main() {
 		}
 	}
 
+	var beforePic image.Image
+	var beforeStart, beforeEnd []int
+	var beforePressTime float64
+
+	train := jump.NewTrain(inputRatio)
+
 	for {
 		jump.Debugger()
 
 		res, pic := screenshot(ip)
+
 		go jump.SavePNG("jump.png", pic)
+		pic = resize.Resize(720, 0, pic, resize.Lanczos3)
+		if len(os.Getenv("DEBUG")) > 0 {
+			go jump.SavePNG("jump.720.png", pic)
+		}
 
 		start, end := jump.Find(pic)
 		if start == nil {
@@ -93,18 +106,36 @@ func main() {
 			log.Fatal("找不到落点，请把 debugger 目录打包发给开发者检查问题。")
 		}
 
+		if beforePic != nil && len(beforeEnd) > 0 {
+			go func() {
+				beforeBlock := jump.FindBeforeBlock(beforePic, pic, beforeEnd, start)
+				if len(beforeBlock) == 2 {
+					actualDistance := jump.Distance(beforeStart, []int{
+						beforeEnd[0] + (start[0] - beforeBlock[0]),
+						beforeEnd[1] + (start[1] - beforeBlock[1]),
+					})
+					train.Add(actualDistance, beforePressTime/actualDistance)
+				}
+			}()
+		}
+
 		distance := jump.Distance(start, end)
-		log.Printf("from:%v to:%v distance:%.2f press:%.2fms ", start, end, distance, distance*inputRatio)
+		trainDistance, guessRatio := train.Find(distance)
+		pressTime := distance * guessRatio
+		log.Printf("from:%v to:%v distance:%.2f similar:%.2f ratio:%v press:%.2fms ", start, end, distance, trainDistance, guessRatio, pressTime)
 
 		_, _, err := r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
 			"x":        jump.Random(100, 400),
 			"y":        jump.Random(100, 400),
-			"duration": distance * inputRatio / 1000,
+			"duration": pressTime / 1000,
 		})
 		if err != nil {
 			log.Fatal("WebDriverAgentRunner 连接失败，请参考 https://github.com/faceair/youjumpijump/issues/71")
 		}
 
+		beforePic = pic
+		beforeStart, beforeEnd = start, end
+		beforePressTime = pressTime
 		time.Sleep(time.Millisecond * 1200)
 	}
 }

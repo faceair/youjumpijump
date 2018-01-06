@@ -4,16 +4,15 @@ import (
 	"image"
 	"image/color"
 	"math"
-	"os"
-
-	"github.com/nfnt/resize"
 )
 
-var ExcludedHeight = 350
-var ExcludedWeight = 25
+const ExcludedHeight = 350
+const ExcludedWeight = 25
+const BottleWeight = 50
+
 var BottleColor = [3]int{55, 56, 97}
 
-func getRGB(m color.Model, c color.Color) [3]int {
+func GetRGB(m color.Model, c color.Color) [3]int {
 	if m == color.RGBAModel {
 		return [3]int{int(c.(color.RGBA).R), int(c.(color.RGBA).G), int(c.(color.RGBA).B)}
 	} else if m == color.RGBA64Model {
@@ -26,30 +25,22 @@ func getRGB(m color.Model, c color.Color) [3]int {
 	return [3]int{0, 0, 0}
 }
 
-func colorSimilar(a, b [3]int, distance float64) bool {
+func ColorSimilar(a, b [3]int, distance float64) bool {
 	return (math.Abs(float64(a[0]-b[0])) < distance) && (math.Abs(float64(a[1]-b[1])) < distance) && (math.Abs(float64(a[2]-b[2])) < distance)
 }
 
 func Find(pic image.Image) ([]int, []int) {
-	pic = resize.Resize(720, 0, pic, resize.Lanczos3)
-
-	if len(os.Getenv("DEBUG")) > 0 {
-		go SavePNG("jump.720.png", pic)
-	}
-
-	bounds := pic.Bounds()
-	w, h := bounds.Max.X, bounds.Max.Y
+	limit := pic.Bounds().Max
 
 	points := [][]int{}
-	for y := 0; y < h; y++ {
+	for gravityY := ExcludedHeight; gravityY < limit.Y; gravityY++ {
 		line := 0
-		for x := 0; x < w; x++ {
-			c := pic.At(x, y)
-			if colorSimilar(getRGB(pic.ColorModel(), c), BottleColor, 20) {
+		for maxX := 0; maxX < limit.X-ExcludedWeight; maxX++ {
+			if ColorSimilar(GetRGB(pic.ColorModel(), pic.At(maxX, gravityY)), BottleColor, 20) {
 				line++
 			} else {
-				if y > ExcludedHeight && x-line > ExcludedWeight && line > 30 {
-					points = append(points, []int{x - line/2, y, line})
+				if line > 30 {
+					points = append(points, []int{maxX - line/2, gravityY, line})
 				}
 				line = 0
 			}
@@ -67,17 +58,16 @@ func Find(pic image.Image) ([]int, []int) {
 	}
 
 	points = [][]int{}
-	for y := 0; y < h; y++ {
+	for axisY := ExcludedHeight; axisY < limit.Y; axisY++ {
 		line := 0
-		bgColor := getRGB(pic.ColorModel(), pic.At(w-ExcludedWeight, y))
-		for x := 0; x < w; x++ {
-			c := pic.At(x, y)
-			if !colorSimilar(getRGB(pic.ColorModel(), c), bgColor, 5) {
+		bgColor := GetRGB(pic.ColorModel(), pic.At(limit.X-ExcludedWeight, axisY))
+		for maxX := ExcludedWeight; maxX < limit.X-ExcludedWeight; maxX++ {
+			if !ColorSimilar(GetRGB(pic.ColorModel(), pic.At(maxX, axisY)), bgColor, 5) {
 				line++
 			} else {
-				if y > ExcludedHeight && x-line > ExcludedWeight && line > 30 &&
-					((x-line/2) < (bottle[0]-20) || (x-line/2) > (bottle[0]+20)) {
-					points = append(points, []int{x - line/2, y, line, x})
+				axisX := maxX - line/2
+				if line > 30 && (axisX < (bottle[0]-BottleWeight/2) || axisX > (bottle[0]+BottleWeight/2)) {
+					points = append(points, []int{axisX, axisY, line, maxX})
 				}
 				line = 0
 			}
@@ -92,7 +82,13 @@ func Find(pic image.Image) ([]int, []int) {
 			block = point
 		}
 	}
-	block = []int{block[0], block[1]}
+	for topY := ExcludedHeight; topY < limit.Y; topY++ {
+		bgColor := GetRGB(pic.ColorModel(), pic.At(limit.X-ExcludedWeight, topY))
+		if !ColorSimilar(GetRGB(pic.ColorModel(), pic.At(block[0], topY)), bgColor, 5) {
+			block = append(block, topY)
+			break
+		}
+	}
 
 	return bottle, block
 }
