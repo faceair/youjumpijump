@@ -10,6 +10,7 @@ import (
 )
 
 var randDeviation int
+var randCount int
 
 func init() {
 	rand.Seed(time.Now().Unix())
@@ -31,14 +32,18 @@ func GenWaitTime() int {
 }
 
 func GenRandDeviation(block []int) ([]int, int) {
-	if block[2] > 120 && randDeviation == 0 {
-		randDeviation = Random(15, 20)
-		if Random(0, 2) == 0 {
-			randDeviation *= -1
+	randDeviation = 0
+	if block[2] > 142 {
+		if randCount == 0 {
+			randDeviation = Random(18, 28)
+			if Random(0, 2) == 0 {
+				randDeviation *= -1
+			}
 		}
-	} else {
-		// 不连续偏移，极有可能掉
-		randDeviation = 0
+		randCount++
+		if randCount == 2 {
+			randCount = 0
+		}
 	}
 	block[0] += randDeviation
 	return block, randDeviation

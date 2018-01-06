@@ -22,7 +22,6 @@ Android 设备
 2. 进入微信打开微信跳一跳，点击开始游戏
 3. 将下载的文件 Push 到手机上 `adb push ./youjumpijump-android /data/local/tmp/ && adb shell`
 4. 跑起来 `cd /data/local/tmp/ && chmod 775 ./youjumpijump-android && ./youjumpijump-android`
-5. 可以开启开发者选项中的指针位置选项，每次跳动的时候会在屏幕上画一条线，可以判断程序每次的定位准不准
 
 iOS 设备
 
