@@ -86,6 +86,9 @@ func main() {
 		res, pic := screenshot(ip)
 		go jump.SavePNG("jump.png", pic)
 
+		displayX := pic.Bounds().Dx()
+		displayY := pic.Bounds().Dy()
+
 		start, end := jump.Find(pic)
 		if start == nil {
 			log.Fatal("找不到起点，请把 debugger 目录打包发给开发者检查问题。")
@@ -97,8 +100,8 @@ func main() {
 		log.Printf("from:%v to:%v distance:%.2f press:%.2fms ", start, end, distance, distance*inputRatio)
 
 		_, _, err := r.PostJSON(fmt.Sprintf("http://%s/session/%s/wda/touchAndHold", ip, res.SessionID), map[string]interface{}{
-			"x":        jump.Random(100, 400),
-			"y":        jump.Random(100, 400),
+			"x":        jump.Random(displayX-400, displayX-100),
+			"y":        jump.Random(displayY-400, displayY-100),
 			"duration": distance * inputRatio / 1000,
 		})
 		if err != nil {

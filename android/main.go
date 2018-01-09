@@ -67,6 +67,8 @@ func main() {
 			pic = screenshot()
 			go jump.SavePNG("jump.png", pic)
 		}
+		displayX := pic.Bounds().Dx()
+		displayY := pic.Bounds().Dy()
 
 		start, end := jump.Find(pic)
 		if start == nil {
@@ -78,7 +80,7 @@ func main() {
 		distance := jump.Distance(start, end)
 		log.Printf("from:%v to:%v distance:%.2f press:%.2fms ", start, end, distance, distance*inputRatio)
 
-		touchX, touchY := strconv.Itoa(jump.Random(100, 400)), strconv.Itoa(jump.Random(100, 400))
+		touchX, touchY := strconv.Itoa(jump.Random(displayX-400, displayX-100)), strconv.Itoa(jump.Random(displayY-400, displayY-100))
 		_, err = exec.Command("/system/bin/sh", "/system/bin/input", "swipe", touchX, touchY, touchX, touchY,
 			strconv.Itoa(int(distance*inputRatio))).Output()
 		if err != nil {
